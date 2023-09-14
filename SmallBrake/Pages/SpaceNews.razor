@@ -1,0 +1,50 @@
+﻿@page "/spacenews"
+@using System.Text.Json
+
+<PageTitle>Space News</PageTitle>
+
+@using SmallBrake.Data
+@using SmallBrake.Models
+@inject WeatherForecastService ForecastService
+
+<div class="wdth70">
+    <h1>Space News from NASA</h1>
+    <hr class="hr hr-blurry mbot20" />
+
+    @if (apod == null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else
+    {
+        <h4>Image of the day: @apod.title</h4>
+        <div>
+            <div>
+                <img class="apod_img" src="@apod.url" />
+            </div>
+            <p class="just">@apod.explanation</p>
+            <div class="clr"></div>
+        </div>
+        <hr class="hr hr-blurry mbot20" />
+        <div class="mbot80 clr"></div>
+    }
+</div>
+
+@code {
+    HttpRequestMessage requestMessage;
+    HttpResponseMessage responseMessage;
+    HttpClient client;
+    private ApodData? apod;
+
+    protected override async Task OnInitializedAsync()
+    {
+        client = new HttpClient();
+        requestMessage = new HttpRequestMessage
+        {
+            Method = HttpMethod.Get,
+            RequestUri = new Uri(@"https://api.nasa.gov/planetary/apod?api_key=cg94Henhhd5iwgrla1gLfGFjwpbHQTqg7a2v4eie")
+        };
+        responseMessage = await client.SendAsync(requestMessage);
+        apod = JsonSerializer.Deserialize<ApodData>(await responseMessage.Content.ReadAsStringAsync());
+    }
+}
